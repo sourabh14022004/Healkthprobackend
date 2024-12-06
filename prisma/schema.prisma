@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  qrCodes   QRCode[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QRCode {
+  id        Int       @id @default(autoincrement())
+  url       String
+  metadata  Json?
+  isDynamic Boolean   @default(false)
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  events    Event[]
+  urlHistory URLHistory[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Event {
+  id        Int      @id @default(autoincrement())
+  qrCodeId  Int
+  qrCode    QRCode   @relation(fields: [qrCodeId], references: [id])
+  timestamp DateTime @default(now())
+  location  String?
+  deviceType String?
+  ipAddress String?
+  userAgent String?
+}
+
+model URLHistory {
+  id        Int      @id @default(autoincrement())
+  qrCodeId  Int
+  qrCode    QRCode   @relation(fields: [qrCodeId], references: [id])
+  oldUrl    String
+  newUrl    String
+  updatedAt DateTime @default(now())
+}
